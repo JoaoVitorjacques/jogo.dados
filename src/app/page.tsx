@@ -1,136 +1,179 @@
-"use client"; // Necessário para usar botões e estados
+"use client";
 import { useState } from "react";
 import Dado from "@/components/Dado";
 
 export default function JogoDados() {
-  // Estados: onde o React guarda as informações que mudam na tela
+  // --- ESTADOS DO JOGO ---
   const [rodada, setRodada] = useState(1);
-  const [dadosA, setDadosA] = useState([1, 1]); // Jogador A começa com dois dados valor 1
-  const [dadosB, setDadosB] = useState([1, 1]); // Jogador B começa com dois dados valor 1
-  const [turnoA, setTurnoA] = useState(true);   // Controla se é a vez do Jogador A
-  const [statusRodada, setStatusRodada] = useState("Clique para iniciar!");
+  const [dadosA, setDadosA] = useState([1, 1]);
+  const [dadosB, setDadosB] = useState([1, 1]);
+  const [turnoA, setTurnoA] = useState(true); // Controla qual botão está ativo
+  const [statusRodada, setStatusRodada] = useState("Jogador A, comece a rodada!");
+  
+  // Placar para saber quem venceu a partida no final
   const [vitoriasA, setVitoriasA] = useState(0);
   const [vitoriasB, setVitoriasB] = useState(0);
   const [fimDeJogo, setFimDeJogo] = useState(false);
 
+  // Função para gerar número aleatório de 1 a 6
   const rolar = () => Math.floor(Math.random() * 6) + 1;
 
-  const jogarA = () => {
+  // --- AÇÃO DO JOGADOR A ---
+  const jogarJogadorA = () => {
     setDadosA([rolar(), rolar()]);
-    setTurnoA(false); // Desativa botão A, ativa botão B
-    setStatusRodada("Vez do Jogador B");
+    setTurnoA(false); // Passa a vez para o B
+    setStatusRodada("Agora é a vez do Jogador B!");
   };
 
-  const jogarB = () => {
+  // --- AÇÃO DO JOGADOR B ---
+  const jogarJogadorB = () => {
     const novosDadosB = [rolar(), rolar()];
     setDadosB(novosDadosB);
 
-    // Lógica de quem venceu a rodada atual
+    // Soma os pontos para ver quem ganhou a RODADA
     const somaA = dadosA[0] + dadosA[1];
     const somaB = novosDadosB[0] + novosDadosB[1];
 
     if (somaA > somaB) {
       setVitoriasA(vitoriasA + 1);
-      setStatusRodada("Jogador A Venceu a Rodada!");
+      setStatusRodada("Jogador A venceu esta rodada!");
     } else if (somaB > somaA) {
       setVitoriasB(vitoriasB + 1);
-      setStatusRodada("Jogador B Venceu a Rodada!");
+      setStatusRodada("Jogador B venceu esta rodada!");
     } else {
-      setStatusRodada("Empate na Rodada!");
+      setStatusRodada("Esta rodada empatou!");
     }
 
-    // Avançar rodada ou terminar
+    // Lógica para avançar a rodada ou encerrar o jogo
     if (rodada < 5) {
+      // Espera um pouco para o jogador ler o resultado antes de mudar a rodada
       setTimeout(() => {
         setRodada(rodada + 1);
         setTurnoA(true);
-      }, 1500); // Espera 1.5s para trocar a rodada e dar tempo de ler o resultado
+        setStatusRodada("Jogador A, comece a próxima rodada!");
+      }, 1500);
     } else {
       setFimDeJogo(true);
     }
   };
 
-  const reiniciar = () => {
+  // --- FUNÇÃO PARA REINICIAR (BOTÃO FINAL) ---
+  const reiniciarJogo = () => {
     setRodada(1);
+    setDadosA([1, 1]);
+    setDadosB([1, 1]);
     setVitoriasA(0);
     setVitoriasB(0);
-    setFimDeJogo(false);
     setTurnoA(true);
-    setStatusRodada("Clique para iniciar!");
+    setFimDeJogo(false);
+    setStatusRodada("Jogador A, comece a rodada!");
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 text-black font-sans">
-      <div className="bg-white border-2 border-gray-200 rounded-3xl p-6 w-full max-w-sm shadow-sm">
+      
+      {/* Container Principal (Layout da Foto do Professor) */}
+      <div className="bg-white border-2 border-gray-200 rounded-[2rem] p-8 w-full max-w-sm shadow-sm text-center">
         
-        {/* Cabeçalho da Rodada */}
-        <div className="flex items-center justify-center mb-8">
+        {/* Topo: Número da Rodada */}
+        <div className="flex items-center mb-10">
           <div className="h-[1px] bg-gray-300 flex-grow"></div>
-          <h1 className="px-4 text-xl font-bold italic">Rodada {rodada}</h1>
+          <h1 className="px-4 text-2xl font-bold italic">Rodada {rodada}</h1>
           <div className="h-[1px] bg-gray-300 flex-grow"></div>
         </div>
 
-        {/* Área dos Jogadores */}
-        <div className="flex justify-between items-start mb-12">
-          {/* Jogador A */}
+        {/* Área dos Jogadores e Dados */}
+        <div className="flex justify-between items-start mb-8">
+          {/* Lado Jogador A */}
           <div className="flex flex-col items-center flex-1">
-            <div className="flex gap-1 mb-2">
+            <div className="flex gap-1 mb-3">
               <Dado valor={dadosA[0]} />
               <Dado valor={dadosA[1]} />
             </div>
-            <p className="font-medium">Jogador A</p>
-            {fimDeJogo && <p className="text-xs text-blue-600">Vitórias: {vitoriasA}</p>}
+            <p className="font-bold text-lg">Jogador A</p>
+            <p className="text-sm text-gray-500 italic">
+              {somaA_total(dadosA)} pontos
+            </p>
           </div>
 
-          {/* Jogador B */}
+          {/* Lado Jogador B */}
           <div className="flex flex-col items-center flex-1">
-            <div className="flex gap-1 mb-2">
+            <div className="flex gap-1 mb-3">
               <Dado valor={dadosB[0]} />
               <Dado valor={dadosB[1]} />
             </div>
-            <p className="font-medium">Jogador B</p>
-            {fimDeJogo && <p className="text-xs text-blue-600">Vitórias: {vitoriasB}</p>}
+            <p className="font-bold text-lg">Jogador B</p>
+            <p className="text-sm text-gray-500 italic">
+              {somaB_total(dadosB)} pontos
+            </p>
           </div>
         </div>
 
-        {/* Resultado Central */}
-        <div className="text-center mb-8 h-8">
-          <p className="font-semibold text-lg">{statusRodada}</p>
+        {/* Mensagem de quem venceu a rodada */}
+        <div className="h-12 mb-6 flex items-center justify-center">
+          <p className="font-semibold text-gray-700">{statusRodada}</p>
         </div>
 
-        {/* Botões */}
+        {/* --- ÁREA DE BOTÕES OU MENSAGEM FINAL --- */}
         {!fimDeJogo ? (
           <div className="flex gap-4">
-            <button 
-              onClick={jogarA}
+            {/* Botão Jogador A */}
+            <button
+              onClick={jogarJogadorA}
               disabled={!turnoA}
-              className={`flex-1 py-3 border-2 rounded-full font-bold transition ${turnoA ? 'border-gray-400 text-gray-700 active:bg-gray-100' : 'border-gray-200 text-gray-300'}`}
+              className={`flex-1 py-4 border-2 rounded-full font-bold transition ${
+                turnoA 
+                ? "border-gray-400 text-gray-700 active:bg-gray-100" 
+                : "border-gray-200 text-gray-300 cursor-not-allowed"
+              }`}
             >
               <span className="bg-gray-400 text-white px-2 py-0.5 rounded mr-1">Jogar</span> Dado
             </button>
 
-            <button 
-              onClick={jogarB}
+            {/* Botão Jogador B */}
+            <button
+              onClick={jogarJogadorB}
               disabled={turnoA}
-              className={`flex-1 py-3 border-2 rounded-full font-bold transition ${!turnoA ? 'border-black bg-black text-white active:bg-gray-800' : 'border-gray-200 text-gray-300'}`}
+              className={`flex-1 py-4 border-2 rounded-full font-bold transition ${
+                !turnoA 
+                ? "border-black bg-black text-white active:bg-gray-800 shadow-md" 
+                : "border-gray-200 text-gray-300 cursor-not-allowed"
+              }`}
             >
               Jogar <span className="bg-white text-black px-2 py-0.5 rounded ml-1">Dado</span>
             </button>
           </div>
         ) : (
-          <div className="text-center">
-            <h2 className="text-xl font-black mb-4 uppercase">
-              {vitoriasA > vitoriasB ? "Jogador A Venceu!" : vitoriasB > vitoriasA ? "Jogador B Venceu!" : "Empate Geral!"}
-            </h2>
-            <button 
-              onClick={reiniciar}
-              className="w-full py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition shadow-lg shadow-red-200"
+          /* MENSAGEM FINAL E REINICIAR */
+          <div className="animate-in fade-in zoom-in duration-300">
+            <div className="bg-gray-100 p-4 rounded-2xl mb-6 border-2 border-dashed border-gray-300">
+              <h2 className="text-xl font-black uppercase text-red-600 italic">
+                {vitoriasA > vitoriasB ? "O Jogador A Venceu a Partida!" : 
+                 vitoriasB > vitoriasA ? "O Jogador B Venceu a Partida!" : 
+                 "A Partida terminou em Empate!"}
+              </h2>
+              <p className="text-sm mt-1">Placar final: {vitoriasA} vs {vitoriasB}</p>
+            </div>
+            
+            <button
+              onClick={reiniciarJogo}
+              className="w-full py-5 bg-red-500 text-white rounded-2xl font-bold text-xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 active:scale-95"
             >
-              Jogar Novamente
+              JOGAR NOVAMENTE
             </button>
           </div>
         )}
+
       </div>
+
+      {/* Rodapé explicativo */}
+      <p className="mt-8 text-gray-400 text-xs uppercase tracking-widest">
+        Atividade Next.js • 5 Rodadas
+      </p>
     </main>
   );
 }
+
+// Funções auxiliares para mostrar a soma embaixo do nome (opcional)
+function somaA_total(d: number[]) { return d[0] + d[1]; }
+function somaB_total(d: number[]) { return d[0] + d[1]; }
