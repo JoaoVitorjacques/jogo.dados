@@ -168,12 +168,12 @@ export default function JogoDados() {
 
       {/* Rodapé explicativo */}
       <p className="mt-8 text-gray-400 text-xs uppercase tracking-widest">
-        Atividade Next.js • 5 Rodadas
+        Jogo de Dados em Next.js
       </p>
     </main>
   );
 }
 
-// Funções auxiliares para mostrar a soma embaixo do nome (opcional)
+// Funções auxiliares para mostrar a soma embaixo do nome
 function somaA_total(d: number[]) { return d[0] + d[1]; }
 function somaB_total(d: number[]) { return d[0] + d[1]; }
